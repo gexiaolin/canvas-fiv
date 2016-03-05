@@ -174,17 +174,6 @@ window.onload = function(){
 	}
 
 	//读取数据并绘制到页面中
-<<<<<<< HEAD
-	// if(localStorage.data){
-	// 	list = JSON.parse(localStorage.data);
-	// 	for(var i in list){
-	// 		var x1 = i.split('-')[0];
-	// 		var y1 = i.split('-')[1];
-	// 		key = (list[i] == 1)?true:false;
-	// 		down(x1,y1);
-	// 	}
-	// }
-=======
 	//if(localStorage.data){
 		//list = JSON.parse(localStorage.data);
 		//for(var i in list){
@@ -194,7 +183,6 @@ window.onload = function(){
 			//down(x1,y1);
 		//}
 	//}
->>>>>>> origin/gh-pages
 
 	//重置棋盘，并清除localStorage
 	var reset = document.querySelector('#reset');
