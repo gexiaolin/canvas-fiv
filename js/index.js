@@ -1,194 +1,183 @@
-window.onload = function(){
-	var win = document.querySelector('#win');
-	var yes = document.querySelector('.yes');
-	var no = document.querySelector('.no');
-	var vic = document.querySelector('.vic');
-	var canvas = document.querySelector('#canvas1');
-	var ctx = canvas.getContext('2d');
-	var canvasup = document.querySelector('#canvas2');
-	var ctxup = canvasup.getContext('2d');
-	var stop = document.querySelector('#stop');
-	var regret = document.querySelector('#regret');
-	//边框
-	ctx.beginPath();
-	ctx.strokeStyle = '#333';
-	ctx.lineWidth = 3;
-	ctx.lineCap = 'square';
-	ctx.moveTo(26.5,26.5);
-	ctx.lineTo(26.5,573.5);
-	ctx.lineTo(573.5,573.5);
-	ctx.lineTo(573.5,26.5);
-	ctx.lineTo(26.5,26.5);
-	ctx.stroke();
-	//棋盘线
-	var numx = 65.5,numy = 65.5;
-	ctx.lineWidth = 1;
-	for(var i = 0;i < 13;i++){
-		//棋盘横线
-		ctx.beginPath();
-		ctx.moveTo(26.5,numy);
-		ctx.lineTo(573.5,numy);
-		ctx.stroke();
-		numy += 39;
-		//棋盘竖线
-		ctx.beginPath();
-		ctx.moveTo(numx,26.5);
-		ctx.lineTo(numx,573.5);
-		ctx.stroke();
-		numx += 39;
-	}
-	//天元
-	ctx.beginPath();
-	ctx.fillStyle = '#333';
-	ctx.arc(300,300,5,0,Math.PI*2);
-	ctx.fill();
-	//星
-	ctx.beginPath();
-	ctx.arc(143.5,143.5,4,0,Math.PI*2);
-	ctx.moveTo(145.5,456.5);
-	ctx.arc(143.5,456.5,4,0,Math.PI*2);
-	ctx.moveTo(458.5,456.5);
-	ctx.arc(456.5,456.5,4,0,Math.PI*2);
-	ctx.moveTo(458.5,143.5);
-	ctx.arc(456.5,143.5,4,0,Math.PI*2);
-	ctx.fill();
+window.onload = function () {
 
-	//落子function
-	var key = true;
-	//x/y number 落子X/Y轴    
-	var down = function(x,y){
-		//渐变色
-		var black = ctxup.createRadialGradient(24.5+39*x,24.5+39*y,4,26.5+39*x,26.5+39*y,14);
-			black.addColorStop(0.1,'#555');
-			black.addColorStop(1,'#333');
-		var white = ctxup.createRadialGradient(24.5+39*x,24.5+39*y,4,26.5+39*x,26.5+39*y,14);
-			white.addColorStop(0.1,'#fff');
-			white.addColorStop(1,'#ddd');
-		color = key?black:white;
-		key = !key;
-		ctxup.beginPath();
-		ctxup.fillStyle = color;
-		ctxup.arc(26.5+39*x,26.5+39*y,14,0,Math.PI*2);
-		ctxup.fill();
-	}
+	var canvas = document.querySelector('#canvas');
+  var ctx = canvas.getContext('2d');
+  //棋盘大小
+  ROW = 15,
+  //所有的落子数据
+  qizi = {};
 
-	//点击落子
-	var list = {},x,y;
-	canvasup.onclick = function(ev){
-		x = Math.round((ev.offsetX - 26.5)/39);
-		y = Math.round((ev.offsetY - 26.5)/39);
-		if(list[x+'-'+y] != undefined){
-			return;
-		}else{
-			list[x+'-'+y] = key?1:2;
-			down(x,y);
-			if(key){
-				if(judge(x,y,2)){
-					win.style.display = 'block';
-					vic.innerHTML = '白子胜！'
-					stop.style.display = 'block';
-				}
-			}else{
-				if(judge(x,y,1)){
-					win.style.display = 'block';
-					vic.innerHTML = '黑子胜！'
-					stop.style.display = 'block';
-				}
-			}
-		}
-		localStorage.data = JSON.stringify(list);
-	}
+  var _xx = 22;
+  var _yy = 6.5;
+  var _zz = 314;
+  var W = document.documentElement.clientWidth;
+  var z = [ 3*_xx + _yy, 11*_xx + _yy];
+  var _r = 2;
+  var _aa = 320;
+  var _qizibanjing  = 9;
 
-	//输赢判断
-	var judge = function(x,y,col){
-		var singleCol = {};
-		for(var i in list){
-			if(list[i] == col){
-				singleCol[i] = list[i];
-			}
-		}
-		var tx,ty,lR = 1,uD = 1,luRd =1,ruLd = 1;
-		//横向
-		tx = x;
-		ty = y;
-		while(singleCol[(tx-1)+'-'+ty]){tx--;lR++;}
-		tx = x;
-		ty = y;
-		while(singleCol[(tx+1)+'-'+ty]){tx++;lR++;}
-		if(lR >= 5){return true;}
-		//纵向
-		tx = x;
-		ty = y;
-		while(singleCol[tx+'-'+(ty-1)]){ty--;uD++;}
-		tx = x;
-		ty = y;
-		while(singleCol[tx+'-'+(ty+1)]){ty++;uD++;}
-		if(uD >= 5){return true;}
-		//左上-右下
-		tx = x;
-		ty = y;
-		while(singleCol[(tx-1)+'-'+(ty-1)]){tx--;ty--;luRd++;}
-		tx = x;
-		ty = y;
-		while(singleCol[(tx+1)+'-'+(ty+1)]){tx++;ty++;luRd++;}
-		if(luRd >= 5){return true;}
-		//右上-左下
-		tx = x;
-		ty = y;
-		while(singleCol[(tx-1)+'-'+(ty+1)]){tx--;ty++;ruLd++;}
-		tx = x;
-		ty = y;
-		while(singleCol[(tx+1)+'-'+(ty-1)]){tx++;ty--;ruLd++;}
-		if(ruLd >= 5){return true;}
-	}
-	yes.onclick = function(){
-		localStorage.clear();
-		ctxup.clearRect(0,0,600,600);
-		list = {};
-		key = true;
-		win.style.display = 'none';
-		stop.style.display = 'none';
-	}
-	no.onclick = function(){
-		stop.style.display = 'block';
-		win.style.display = 'none';
-		regret.onclick = null;
-	}
+  if(W >= 768){
+      canvas.width = 600;
+      canvas.height = 600;
+      _xx = 40;
+      _yy = 20.5;
+      _zz = 580;
+      z = [140.5,460.5];
+      _r = 3;
+      _aa = 600;
+      _qizibanjing  = 14;
+      canvas.addEventListener('click',handle);
+  }
 
-	//悔棋
-	regret.onclick = function(){
-		var newlist= {};
-		for(var i in list){
-			if(i != (x+'-'+y)){
-				newlist[i] = list[i];
-			}
-		}
-		list = newlist;
-		ctxup.clearRect(0,0,600,600);
-		for(var i in list){
-			var x1 = i.split('-')[0];
-			var y1 = i.split('-')[1];
-			key = (list[i] == 1)?true:false;
-			down(x1,y1);
-		}
-	}
 
-	//读取数据并绘制到页面中
-	//if(localStorage.data){
-		//list = JSON.parse(localStorage.data);
-		//for(var i in list){
-			//var x1 = i.split('-')[0];
-			//var y1 = i.split('-')[1];
-			//key = (list[i] == 1)?true:false;
-			//down(x1,y1);
-		//}
-	//}
+  var huaqipan = function() {
+    ctx.clearRect(0,0,600,600);
+    for(var i = 0; i < ROW; i++){
+      ctx.strokeStyle = '#24202e';
 
-	//重置棋盘，并清除localStorage
-	var reset = document.querySelector('#reset');
-	reset.onclick = function(){
-		localStorage.clear();
-		ctxup.clearRect(0,0,600,600);
-		location.reload();
-	}
+      ctx.beginPath();
+      ctx.moveTo(_yy-0.5,i*_xx+ _yy);
+      ctx.lineTo(_zz,i*_xx + _yy);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(i*_xx+_yy,_yy-0.5);
+      ctx.lineTo(i*_xx+_yy,_zz);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(_aa/2+0.5,_aa/2+0.5,_r,0,Math.PI*2);
+    ctx.fill();
+    for(var i = 0; i < z.length; i++){
+      for(var j = 0; j < z.length; j++){
+        ctx.beginPath();
+        ctx.arc(z[i],z[j],_r,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+  huaqipan();
+
+  /*
+  *  x    number   落子x坐标
+  *  y    number   落子y坐标
+  *  color boolean  true代表黑子  false代表白子
+  */
+  var luozi = function (x,y,color) {
+    var zx = _xx*x + _yy;
+    var zy = _xx*y + _yy;
+    var black = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
+    black.addColorStop(0.1,'#555');
+    black.addColorStop(1,'black');
+    var white = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
+    white.addColorStop(0.1,'#fff');
+    white.addColorStop(1,'#ddd');
+
+    ctx.fillStyle = ( color == 'black') ?black:white;
+
+    ctx.beginPath();
+    ctx.arc(zx,zy,_qizibanjing,0,Math.PI*2);
+    ctx.fill();
+  }
+  var kongbai = {};
+  for (var i = 0; i < 15; i++) {
+    for (var j = 0; j < 15; j++) {
+      kongbai[ i + '-' + j] = true;
+    }
+  }
+
+  var ai = function () {
+    var max = -1000000; var xx = {};
+    for ( var i  in kongbai){
+      var pos = i;
+      var x = panduan(Number(pos.split('-')[0]),Number(pos.split('-')[1]),'black');
+      if( x > max ){
+        max = x;
+        xx.x = pos.split('-')[0];
+        xx.y = pos.split('-')[1];
+      }
+    }
+
+    var max2 = -1000000; var yy = {};
+    for ( var i  in kongbai){
+      var pos = i;
+      var x = panduan(Number(pos.split('-')[0]),Number(pos.split('-')[1]),'white');
+      if( x > max2 ){
+        max2 = x;
+        yy.x = pos.split('-')[0];
+        yy.y = pos.split('-')[1];
+      }
+    }
+    if( max2 >= max){
+      return yy;
+    }
+    return xx;
+  }
+
+  function handle(e) {
+    var x =  Math.round( (e.offsetX-_yy)/_xx );
+    var y =  Math.round( (e.offsetY-_yy)/_xx );
+    if(e.type == 'tap'){
+      var x =  Math.round( (e.position.x - canvas.offsetLeft - _yy)/_xx );
+      var y =  Math.round( (e.position.y - canvas.offsetTop - _yy)/_xx );
+    }
+
+    if( qizi[x+'-'+y] ){return;}
+    luozi(x,y,'black');
+    qizi[ x + '-' + y ] = 'black';
+    delete kongbai[ x + '-' + y ];
+
+    if( panduan(x,y,'black') >= 5 ){
+      alert('黑棋赢');
+      window.location.reload();
+    }
+
+    var pos = ai();
+    luozi(pos.x,pos.y,'white');
+    qizi[ pos.x + '-' + pos.y ] = 'white';
+    delete kongbai[ pos.x + '-' + pos.y ];
+    if( panduan(Number(pos.x),Number(pos.y),'white') >= 5 ){
+        alert('白棋赢');
+        window.location.reload();
+    };
+  }
+
+  touch.on(canvas,'tap',handle);
+
+
+  var houziAI  = function () {
+    do{
+      var x = Math.floor( Math.random()*15 );
+      var y = Math.floor( Math.random()*15 );
+    }while( qizi[ x + '-' + y ] )
+    return {x:x,y:y};
+  }
+  var xy2id = function(x,y) {
+    return x + '-' + y;
+  }
+
+  var panduan = function(x,y,color) {
+    var shuju = filter(color);
+    var tx,ty,hang = 1;shu = 1; zuoxie= 1;youxie = 1;
+    tx=x;ty=y;while( shuju[ xy2id( tx-1,ty ) ]){tx--;hang++};
+    tx=x;ty=y;while( shuju[ xy2id( tx+1,ty ) ]){tx++;hang++};
+    tx=x;ty=y;while( shuju[ xy2id( tx,ty-1 ) ]){ty--;shu++};
+    tx=x;ty=y;while( shuju[ xy2id( tx,ty+1 ) ]){ty++;shu++};
+    tx=x;ty=y;while( shuju[ xy2id( tx+1,ty-1 ) ]){tx++;ty--;zuoxie++};
+    tx=x;ty=y;while( shuju[ xy2id( tx-1,ty+1 ) ]){tx--;ty++;zuoxie++};
+    tx=x;ty=y;while( shuju[ xy2id( tx-1,ty-1 ) ]){tx--;ty--;youxie++};
+    tx=x;ty=y;while( shuju[ xy2id( tx+1,ty+1 ) ]){tx++;ty++;youxie++};
+    return Math.max(hang,shu,zuoxie,youxie);
+  }
+  var filter = function(color) {
+    var r = {};
+    for(var i in qizi){
+      if(qizi[i]  == color){
+        r[i] = qizi[i];
+      }
+    }
+    return r;
+  }
 }
